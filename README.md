@@ -14,7 +14,7 @@ handle the client's requests.
 
 ## Install
 
-### Prerequires
+### Prerequirements
 * docker
 * jupyter >= 4.1 (you can check with `jupyter --version`)
 * git clone this project by running `git clone https://github.com/`
