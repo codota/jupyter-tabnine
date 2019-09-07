@@ -1,6 +1,7 @@
 # Jupyter TabNine
 
 ## Overview
+![jupyter-tabnine](https://github.com/wenmin-wu/jupyter-tabnine/blob/master/screenshots/jupyter-tabnine.png)
 
 This project provides coding autocompletion based on [TabNine](https://github.com/zxqfl/TabNine) for Jupyter.
 
