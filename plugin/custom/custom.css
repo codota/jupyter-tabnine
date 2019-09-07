@@ -1,0 +1,31 @@
+.complete-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  vertical-align: middle;
+}
+
+.complete-block {
+  width: 300px;
+  height: auto;
+  margin: 3px;
+  overflow: hidden;
+}
+
+
+
+.complete-word {
+  text-align: left;
+}
+
+.complete-prob {
+  text-align: right;
+}
+
+
+.complete-dropdown-content {
+  background-color: #f1f1f1;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
