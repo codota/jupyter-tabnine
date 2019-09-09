@@ -36,8 +36,48 @@ define([
         var CodeCell = codecell.CodeCell;
         var Completer = completer.Completer;
         var logPrefix = '[' + module.id + ']';
-        var doHinting = true;
+        var assistActive = true;
+        var assistDelay = 20;
         var keycodes = keyboard.keycodes;
+
+        var specials = [
+            keycodes.enter,
+            keycodes.esc,
+            keycodes.backspace,
+            keycodes.tab,
+            keycodes.up,
+            keycodes.down,
+            keycodes.left,
+            keycodes.right,
+            keycodes.shift,
+            keycodes.ctrl,
+            keycodes.alt,
+            keycodes.meta,
+            keycodes.capslock,
+            keycodes.space,
+            keycodes.pageup,
+            keycodes.pagedown,
+            keycodes.end,
+            keycodes.home,
+            keycodes.insert,
+            keycodes.delete,
+            keycodes.numlock,
+            keycodes.f1,
+            keycodes.f2,
+            keycodes.f3,
+            keycodes.f4,
+            keycodes.f5,
+            keycodes.f6,
+            keycodes.f7,
+            keycodes.f8,
+            keycodes.f9,
+            keycodes.f10,
+            keycodes.f11,
+            keycodes.f12,
+            keycodes.f13,
+            keycodes.f14,
+            keycodes.f15
+        ];
 
         function onlyModifierEvent(event) {
             var key = keyboard.inv_keycodes[event.which];
@@ -45,18 +85,6 @@ define([
                 (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) &&
                 (key === 'alt' || key === 'ctrl' || key === 'meta' || key === 'shift')
             );
-        }
-
-        function patchCompleterBuildGuiList() {
-            var origCompleterBuildGuiList = Completer.prototype.build_gui_list;
-            Completer.prototype.build_gui_list = function (completions) {
-                console.info(logPrefix, "invoked");
-                var i;
-                for (i = 0; i < 50; i++) {
-                    console.info(logPrefix, 'type: ', completions[i].type);
-                }
-                // return origCompleterBuildGuiList.apply(this, arguments);
-            };
         }
 
         function requestComplterServer(requestData, isAsync, handleResData) {
@@ -107,32 +135,16 @@ define([
                 this.complete = $('<div/>').addClass('completions complete-dropdown-content');
                 this.complete.attr('id', 'complete');
                 $('body').append(this.complete);
-                // this.visible = true;
-
-                // compute the optimized position of the complete
-                var content = msg.content;
-                var start = content.cursor_start;
-                var end = content.cursor_end;
+                this.visible = true;
                 var cur = editor.getCursor();
-                if (end == null) {
-                    end = editor.indexFromPos(cur);
-                    if (start == null) {
-                        start = end;
-                    } else if (start < 0) {
-                        start = end + start;
-                    }
-                } else {
-                    var text = this.editor.getValue();
-                    end = utils.char_idx_to_js_idx(end, text);
-                    start = utils.char_idx_to_js_idx(start, text);
-                }
-
+                var start = editor.indexFromPos(cur);
+                // console.log(logPrefix, 'start: ', start);
                 this.completeFrom = this.editor.posFromIndex(start);
-                this.completeTo = this.editor.posFromIndex(end);
 
                 var pos = this.editor.cursorCoords(
-                    this.editor.posFromIndex(start)
+                    this.completeFrom
                 );
+                // console.log(logPrefix, 'pos: ', pos);
                 var left = pos.left - 3;
                 var top;
                 var cheight = this.complete.height();
@@ -147,14 +159,40 @@ define([
                     'left': left + 'px',
                     'top': top + 'px',
                 })
+
                 // get completions
                 var cmp = this;
                 requestComplterServer(requestInfo, true, function (data) {
                     console.info(logPrefix, "data: ", data);
                     var complete = cmp.complete;
                     if (data.results.length == 0) {
+                        cmp.close();
                         return;
                     }
+
+                    if (data.old_prefix) {
+                        cmp.completeFrom.ch -= data.old_prefix.length;
+                    }
+
+                    var pos = cmp.editor.cursorCoords(
+                        cmp.completeFrom
+                    );
+
+                    var left = pos.left - 3;
+                    var top;
+                    var cheight = cmp.complete.height();
+                    var wheight = $(window).height();
+                    if (pos.bottom + cheight + 5 > wheight) {
+                        top = pos.top - cheight - 4;
+                    } else {
+                        top = pos.bottom + 1;
+                    }
+
+                    cmp.complete.css({
+                        'left': left + 'px',
+                        'top': top + 'px',
+                    })
+
                     data.results.slice(0, MAX_NUM_HINTS).forEach(function (res) {
                         var hintsContainer = $('<div/>')
                             .addClass('complete-container');
@@ -170,70 +208,99 @@ define([
                         hintsContainer.append(probContainer);
                         complete.append(hintsContainer);
                     });
-                    cmp.visible = true;
                     addKeyeventListeners(cmp);
                 });
+                return true;
             };
         }
 
         function addKeyeventListeners(completer) {
             var hints = $("#complete").find('.complete-container');
             var editor = completer.editor;
-            // editor.on('keypress', function (event) {
-            //     console.info(logPrefix, 'KeyPress: ', event.keyCode);
-            // });
             var currIndex = -1;
             var preIndex;
-            editor.on('keydown', function (comp, event) {
+            completer._handle_keydown = function (comp, event) { // define as member method to handle close
                 if (event.keyCode == keycodes.up || event.keyCode == keycodes.tab
                     || event.keyCode == keycodes.down) {
-                    console.info(logPrefix, ' complete visible: ', completer.visible);
                     if (!completer.visible) {
                         return;
                     }
+                    event.codemirrorIgnore = true;
+                    event._ipkmIgnore = true;
                     event.preventDefault();
                     switch (event.keyCode) {
                         case keycodes.down:
                         case keycodes.tab:
                             preIndex = currIndex;
                             currIndex += 1;
-                            event.preventDefault();
                             break;
                         case keycodes.up:
                             preIndex = currIndex;
                             currIndex -= 1;
-                            event.preventDefault();
                             break;
                     }
-                    currIndex = currIndex < 0 ? 
-                                    hints.length - 1
-                                    : (currIndex >= hints.length ?
-                                            currIndex - hints.length
-                                            : currIndex); 
+                    currIndex = currIndex < 0 ?
+                        hints.length - 1
+                        : (currIndex >= hints.length ?
+                            currIndex - hints.length
+                            : currIndex);
                     $(hints[currIndex]).css('background', 'lightblue');
                     var completeStr = $(hints[currIndex]).find('.complete-word').text();
                     var cur = editor.getCursor();
-                    console.log(logPrefix, 'num hints: ', hints.length, 'currIndex: ', currIndex, 'preIndex: ', preIndex);
-                    // var end = editor.indexFromPos(cur);
-                    // var text = editor.getValue();
-                    // end = utils.char_idx_to_js_idx(end, text);
-                    // var completeTo = editor.posFromIndex(end);
-                    console.log(logPrefix, 'completeStr: ', completeStr, ' From:', completer.completeFrom, ' To:', cur);
                     editor.replaceRange(completeStr, completer.completeFrom, cur);
                     if (preIndex != -1) {
                         $(hints[preIndex]).css('background', '');
                     }
-                } else if(event.keyCode == keycodes.esc
-                     || event.keyCode == keycodes.backspace || event.keyCode == keycodes.space
-                     || event.keyCode == keycodes.enter) {
+                } else if (event.keyCode == keycodes.esc ||
+                    event.keyCode == keycodes.enter) {
+                    event.codemirrorIgnore = true;
+                    event._ipkmIgnore = true;
+                    event.preventDefault();
+                    completer.close();
+                } else {
                     completer.close();
                 }
-            });
+            }
+
+            editor.on('keydown', completer._handle_keydown);
+
+            completer._handle_keypress = function (comp, event) {
+                var code = event.keyCode;
+                if (event.charCode == 0 ||
+                    code == keycodes.tab ||
+                    code == keycodes.enter ||
+                    code == keycodes.up ||
+                    code == keycodes.down
+                ) return;
+                completer.close();
+                completer.editor.focus();
+                console.log(logPrefix, 'keypress', event.keyCode);
+            }
+            editor.on('keypress', completer._handle_keypress);
+        }
+
+        function patchCellKeyevent() {
+            var origHandleCodemirrorKeyEvent = Cell.prototype.handle_codemirror_keyevent;
+            Cell.prototype.handle_codemirror_keyevent = function (editor, event) {
+                if (assistActive && (this instanceof CodeCell) && !onlyModifierEvent(event)) {
+                    this.tooltip.remove_and_cancel_tooltip();
+
+                    if (!editor.somethingSelected() &&
+                        editor.getSelections().length <= 1 &&
+                        !this.completer.visible &&
+                        specials.indexOf(event.keyCode) == -1) {
+                        var cell = this;
+                        cell.completer.startCompletion();
+                        setTimeout(function () {
+                            cell.completer.startCompletion();
+                        }, assistDelay)
+                    }
+                }
+            }
         }
 
         function load_ipython_extension() {
-            patchCompleterBuildGuiList();
-            //  patchCellKeyevent();
+            patchCellKeyevent();
             patchCompleterFinishCompleting();
         }
 

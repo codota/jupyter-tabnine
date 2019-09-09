@@ -5,7 +5,6 @@ if ! type "docker" > /dev/null; then
 fi
 
 IMAGE_NAME="tabnine-server:latest"
-docker build -t=${IMAGE_NAME} .
 docker run --rm --name jupyter-tabnine-server \
     -p 9999:8080 -d ${IMAGE_NAME}
 echo "Please start your jupyter notebook and enjoy :)"
