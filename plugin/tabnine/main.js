@@ -101,7 +101,7 @@ define([
                 },
                 data: JSON.stringify(requestData),
                 success: function (data, status, xhr) {
-                    logData(data);
+                    // logData(data);
                     handleResData(data);
                 },
                 error: function (request, status, error) {
