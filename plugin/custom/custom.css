@@ -7,10 +7,9 @@
 }
 
 .complete-block {
-  min-width: 150px;
+  min-width: 200px;
   margin: 2px;
   padding: 1px;
-  /* overflow: hidden; */
   display: inline-block;
 }
 
@@ -21,14 +20,13 @@
   text-align: left;
 }
 
-.complete-prob {
+.complete-detail {
   text-align: right;
 }
 
 
 .complete-dropdown-content {
-  background-color: #f1f1f1;
-  overflow: auto;
+  background-color: rgb(255, 255, 255, 0.85);
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
-  z-index: 1;
 }
+
