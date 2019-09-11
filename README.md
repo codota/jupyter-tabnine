@@ -17,7 +17,7 @@ handle the client's requests.
 ### Prerequirements
 * docker
 * jupyter >= 4.1 (you can check with `jupyter --version`)
-* git clone this project by running `git clone https://github.com/`
+* git clone this project by running `git clone git@github.com:wenmin-wu/jupyter-tabnine.git`
 
 ### For Linux or Mac
 
