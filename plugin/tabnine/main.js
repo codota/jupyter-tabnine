@@ -25,7 +25,7 @@ define([
             assist_delay: 0,
             before_line_limit: -1,
             after_line_limit: -1,
-            server_url: 'http://coding-assistant-playground.ingress.dev.grabds.com'
+            server_url: 'http://127.0.0.1:9999/'
         }
         var logPrefix = '[' + module.id + ']';
         console.info(logPrefix, ' config: ', config);
