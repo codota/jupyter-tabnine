@@ -10,9 +10,6 @@ This can't be done with Jupyter Notebook, since child process can't be created w
 
 In this repository, it is achieved through ching the plugin to a HTTP client and starting a server wirtten in Golang to wrap the TabNine binray and handle the clients requests.
 
-I solved this by change the plugin to a HTTP client and start a server written in `Golang` wrapped the TabNine binary and
-handle the client's requests.
-
 ## Install
 
 ### Prerequirements
