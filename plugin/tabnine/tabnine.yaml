@@ -42,4 +42,4 @@ Parameters:
   description: |
     URL of the server which handles the completion request.
   input_type: string
-  default: 'http://coding-assistant-playground.ingress.dev.grabds.com'
+  default: 'http://localhost:9999/'
