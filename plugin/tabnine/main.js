@@ -18,6 +18,25 @@ define([
     completer
 ) {
         'use strict';
+
+        var config = {
+            assist_active: true,
+            options_limit: 10,
+            assist_delay: 0,
+            before_line_limit: -1,
+            after_line_limit: -1,
+            server_url: 'http://coding-assistant-playground.ingress.dev.grabds.com'
+        }
+        var logPrefix = '[' + module.id + ']';
+        console.info(logPrefix, ' config: ', config);
+
+        const optionsLimit = config.options_limit;
+        var beforeLineLimit = config.before_line_limit > 0 ? config.before_line_limit : Infinity;
+        var afterLineLimit = config.after_line_limit > 0 ? config.after_line_limit : Infinity;
+        var assistDelay = config.assist_delay;
+        var assistActive = config.assist_active;
+        var serverUrl = config.server_url;
+
         var requestInfo = {
             "version": "1.0.7",
             "request": {
@@ -27,21 +46,14 @@ define([
                     "after": "",
                     "region_includes_beginning": false,
                     "region_includes_end": false,
-                    "max_num_results": 5
+                    "max_num_results": optionsLimit,
                 }
             }
         }
-        const MAX_NUM_HINTS = 10;
+
         var Cell = cell.Cell;
         var CodeCell = codecell.CodeCell;
         var Completer = completer.Completer;
-        var logPrefix = '[' + module.id + ']';
-        var assistActive = true;
-        // TODO: move this to cnfig yaml
-        var assistDelay = 0;
-        var beforeLineLimit = Infinity;
-        var afterLineLimit = Infinity;
-
         var keycodes = keyboard.keycodes;
         var specials = [
             keycodes.enter,
@@ -91,8 +103,9 @@ define([
         }
 
         function requestComplterServer(requestData, isAsync, handleResData) {
+            // console.info(logPrefix, 'requesetData', JSON.stringify(requestData));
             $.ajax({
-                url: 'http://localhost:9999/',
+                url: serverUrl,
                 type: 'post',
                 async: isAsync,
                 dataType: 'json',
@@ -101,7 +114,6 @@ define([
                 },
                 data: JSON.stringify(requestData),
                 success: function (data, status, xhr) {
-                    // logData(data);
                     handleResData(data);
                 },
                 error: function (request, status, error) {
@@ -110,17 +122,10 @@ define([
             });
         }
 
-        function logData(data) {
-            data.results.forEach(function (res) {
-                console.info(logPrefix, 'new_prefix: ', res.new_prefix,
-                    ' old_suffix: ', res.old_prefix, ' new_suffix: ', res.new_prefix, ' detail:', res.detail);
-            });
-        }
-
         function isValidCodeLine(line) {
+            // comment line is valid, since we want to get completions
             if (line.length === 0 ||
-                line.charAt(0) === '!' ||
-                line.charAt(0) === '#') {
+                line.charAt(0) === '!') {
                 return false;
             }
             return true;
@@ -146,59 +151,66 @@ define([
                     before.push(currLine.slice(0, cursor.ch));
                     after.push(currLine.slice(cursor.ch, currLine.length));
                 }
+
                 var i = cursor.line - 1;
-                while (i >= 0 && before.length < beforeLineLimit) {
+                for (; i >= 0; before.length < beforeLineLimit, i--) {
                     if (isValidCodeLine(currCellLines[i])) {
                         before.push(currCellLines[i]);
                     }
-                    i -= 1;
                 }
+                requestInfo.request.Autocomplete.region_includes_beginning = (i < 0);
+
                 i = cursor.line + 1;
-                while (i < currCellLines.length && after.length < afterLineLimit) {
+                for (; i < currCellLines.length && after.length < afterLineLimit; i++) {
                     if (isValidCodeLine(currCellLines[i])) {
                         after.push(currCellLines[i]);
                     }
-                    i += 1;
                 }
+
                 var cells = Jupyter.notebook.get_cells();
                 var index;
                 for (index = cells.length - 1; index >= 0 && cells[index] != currCell; index--);
+                var regionIncludesBeginning = requestInfo.request.Autocomplete.region_includes_beginning;
+                requestInfo.request.Autocomplete.region_includes_beginning = regionIncludesBeginning && (index == 0);
                 requestInfo.request.Autocomplete.region_includes_end = (i == currCellLines.length)
                     && (index == cells.length - 1);
                 // need lookup other cells
                 if (before.length < beforeLineLimit || after.length < afterLineLimit) {
                     i = index - 1;
-                    while (i >= 0 && before.length < beforeLineLimit) {
+                    // always use for loop instead of while loop if poosible.
+                    // since I always foget to describe/increase i in while loop
+                    var atLineBeginning = true; // set true in case of three is no more lines before
+                    for (; i >= 0 && before.length < beforeLineLimit; i--) {
                         var cellLines = cells[i].get_text().split("\n");
                         var j = cellLines.length - 1;
-                        while (j >= 0 && before.length < beforeLineLimit) {
+                        atLineBeginning = false;
+                        for (; j >= 0 && before.length < beforeLineLimit; j--) {
                             if (isValidCodeLine(cellLines[j])) {
                                 before.push(cellLines[j]);
                             }
-                            j -= 1;
                         }
-                        i -= 1;
+                        atLineBeginning = (j < 0);
                     }
+                    // at the first cell and at the first line of that cell
+                    requestInfo.request.Autocomplete.region_includes_beginning = (i < 0) && atLineBeginning;
+
                     i = index + 1;
-                    var atLineEnd = true;
-                    while (i < cells.length && after.length < afterLineLimit) {
+                    var atLineEnd = true; // set true in case of three is no more liens left
+                    for (; i < cells.length && after.length < afterLineLimit; i++) {
                         var cellLines = cells[i].get_text().split("\n");
                         j = 0;
                         atLineEnd = false;
-                        while (!atLineEnd && after.length < afterLineLimit) {
+                        for (; j < cellLines.length && after.length < afterLineLimit; j++) {
                             if (isValidCodeLine(cellLines[j])) {
                                 after.push(cellLines[j]);
                             }
-                            j += 1;
-                            atLineEnd = (j == cellLines.length);
                         }
-                        i += 1;
+                        atLineEnd = (j == cellLines.length);
                     }
-                requestInfo.request.Autocomplete.region_includes_beginning = before.length == 1;
+                    // at the last cell and at the last line of that cell
                     requestInfo.request.Autocomplete.region_includes_end = (i == cells.length) && atLineEnd;
                 }
                 before.reverse();
-
                 this.before = before;
                 this.after = after;
 
@@ -209,8 +221,6 @@ define([
                 this.complete.attr('id', 'complete');
                 $('body').append(this.complete);
                 this.visible = true;
-                // var start = currEditor.indexFromPos(cursor);
-                // this.completeFrom = currEditor.posFromIndex(start);
                 // fix page flickering
                 this.start = currEditor.indexFromPos(cursor);
                 this.complete.css({
@@ -224,7 +234,8 @@ define([
                         cmp.close();
                         return;
                     }
-                    data.results.slice(0, MAX_NUM_HINTS).forEach(function (res) {
+                    cmp.completions = data.results.slice(0, optionsLimit);
+                    cmp.completions.forEach(function (res) {
                         var completeContainer = generateCompleteContainer(res);
                         complete.append(completeContainer);
                     });
@@ -239,7 +250,7 @@ define([
             var start = completer.start;
             completer.completeFrom = completer.editor.posFromIndex(start);
             if (oldPrefix) {
-                oldPrefix = oldPrefix.trim();
+                oldPrefix = oldPrefix;
                 completer.completeFrom.ch -= oldPrefix.length;
                 // completer.completeFrom.ch = Math.max(completer.completeFrom.ch, 0);
             }
@@ -298,12 +309,18 @@ define([
         }
 
         function addKeyeventListeners(completer) {
-            var hints = $("#complete").find('.complete-container');
+            var options = $("#complete").find('.complete-container');
             var editor = completer.editor;
             var currIndex = -1;
             var preIndex;
-            completer.isKeyupFired = true;
+            completer.isKeyupFired = true; // make keyup only fire once
             completer._handle_keydown = function (comp, event) { // define as member method to handle close
+                // since some opration is async, it's better to check whether complete is existing or not.
+                if (!$('#complete').length || !completer.completions) {
+                    // editor.off('keydown', completer._handle_keydown);
+                    // editor.off('keyup', completer._handle_handle_keyup);
+                    return;
+                }
                 completer.isKeyupFired = false;
                 if (event.keyCode == keycodes.up || event.keyCode == keycodes.tab
                     || event.keyCode == keycodes.down) {
@@ -313,16 +330,20 @@ define([
                     preIndex = currIndex;
                     currIndex = event.keyCode == keycodes.up ? currIndex - 1 : currIndex + 1;
                     currIndex = currIndex < 0 ?
-                        hints.length - 1
-                        : (currIndex >= hints.length ?
-                            currIndex - hints.length
+                        options.length - 1
+                        : (currIndex >= options.length ?
+                            currIndex - options.length
                             : currIndex);
-                    $(hints[currIndex]).css('background', 'lightblue');
-                    var completeStr = $(hints[currIndex]).find('.complete-word').text().trim();
-                    var cur = editor.getCursor();
-                    editor.replaceRange(completeStr, completer.completeFrom, cur);
+                    $(options[currIndex]).css('background', 'lightblue');
+                    var end = editor.getCursor();
+                    if (completer.completions[currIndex].old_suffix) {
+                        end.ch += completer.completions[currIndex].old_suffix.length;
+                    }
+                    var replacement = completer.completions[currIndex].new_prefix;
+                    replacement += completer.completions[currIndex].new_suffix;
+                    editor.replaceRange(replacement, completer.completeFrom, end);
                     if (preIndex != -1) {
-                        $(hints[preIndex]).css('background', '');
+                        $(options[preIndex]).css('background', '');
                     }
                 } else if (needUpdateComplete(event.keyCode)) {
                     // Let this be handled by keyup, since it can get current pressed key.
@@ -347,6 +368,8 @@ define([
         function addCompleterUpdate() {
             Completer.prototype.update = function () {
                 // In this case, only current line have been changed.
+                // so we can use cached other lines and this line to
+                // generate before and after
                 var cursor = this.editor.getCursor();
                 this.start = this.editor.indexFromPos(cursor); // get current cursor
                 var currLineText = this.editor.getLineHandle(cursor.line).text;
@@ -370,20 +393,18 @@ define([
                         cmp.close();
                         return;
                     }
-                    if (!data.old_prefix) {
-                        setCompleteLocation(cmp, data.old_prefix);
-                    }
+                    setCompleteLocation(cmp, data.old_prefix);
                     var results = data.results;
                     var completeContainers = $("#complete").find('.complete-container');
                     var i;
-                    // replace current hints first
-                    for (i = 0; i < MAX_NUM_HINTS && i < completeContainers.length
-                        && i < results.length; i++) {
+                    cmp.completions = results.slice(0, optionsLimit);
+                    // replace current options first
+                    for (i = 0; i < cmp.completions.length && i < completeContainers.length; i++) {
                         $(completeContainers[i]).find('.complete-word').text(results[i].new_prefix);
                         $(completeContainers[i]).find('.complete-detail').text(results[i].detail);
                     }
                     // add
-                    for (; i < MAX_NUM_HINTS && i < results.length; i++) {
+                    for (; i < cmp.completions.length; i++) {
                         var completeContainer = generateCompleteContainer(results[i]);
                         cmp.complete.append(completeContainer);
                     }
@@ -406,6 +427,9 @@ define([
                 this.editor.off('keydown', this._handle_keydown);
                 // this.editor.off('keypress', this._handle_keypress); disabled since this can be replaced with keydown.
                 this.visible = false;
+                this.completions = null;
+                this.completeFrom = null;
+                this.complete = null;
                 // before are copied from completer.js
                 this.editor.off('keyup', this._handle_key_up);
             };
@@ -431,14 +455,49 @@ define([
             };
         }
 
-        function load_ipython_extension() {
-            addCompleterUpdate();
-            patchCellKeyevent();
-            patchCompleterClose();
-            patchCompleterFinishCompleting();
+        function setAssistState(newState) {
+            assistActive = newState;
+            $('.tabnine-toggle > .fa').toggleClass('fa-check', assistActive);
+            console.log(logPrefix, 'continuous autocompletion', assistActive ? 'on' : 'off');
         }
 
+        function toggleAutocompletion() {
+            setAssistState(!assistActive);
+        }
+
+        function addMenuItem() {
+            if ($('#help_menu').find('.tabnine-toggle').length > 0) {
+                return;
+            }
+            var menuItem = $('<li/>').insertAfter('#keyboard_shortcuts');
+            var menuLink = $('<a/>').text('Jupyter TabNine')
+                .addClass('tabnine-toggle')
+                .attr('title', 'Provide continuous code autocompletion')
+                .on('click', toggleAutocompletion)
+                .appendTo(menuItem);
+            $('<i/>').addClass('fa menu-icon pull-right').prependTo(menuLink);
+        }
+
+
+        function load_notebook_extension() {
+            Jupyter.notebook.config.loaded.then(function on_success() {
+                // Note: seems there's bug of pipeline, loaded will ends with
+                // `resolved undefined`, so the yaml config won't work.
+                $.extend(true, config, Jupyter.notebook.config.data.jupytertabnine);
+            }, function on_error(err) {
+                console.warn(logPrefix, 'error loading config:', err);
+            }).then(function on_success() {
+                addCompleterUpdate();
+                patchCellKeyevent();
+                patchCompleterClose();
+                patchCompleterFinishCompleting();
+                addMenuItem();
+                setAssistState(config.assist_active);
+
+            });
+        }
         return {
-            load_ipython_extension: load_ipython_extension
+            load_ipython_extension: load_notebook_extension
         };
     });
+
