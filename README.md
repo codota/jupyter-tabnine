@@ -46,5 +46,5 @@ cp plugin/custom/custom.css ${HOME}/.jupyter/custom/ #For windows: cp plugin/cus
 ```
 
 ## TODO
-[ ] Package this extension to a pypi package.
-[ ] Develop an extension for JupyterLab.
+- [ ] Package this extension to a pypi package.
+- [ ] Develop an extension for JupyterLab.
