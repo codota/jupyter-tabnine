@@ -42,4 +42,4 @@ Parameters:
   description: |
     URL of the server which handles the completion request.
   input_type: string
-  default: 'http://localhost:9999/'
+  default: 'http://127.0.0.1:9999/'
