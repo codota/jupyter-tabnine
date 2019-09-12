@@ -5,9 +5,10 @@
 
 This project provides coding autocompletion based on [TabNine](https://github.com/zxqfl/TabNine) for Jupyter.
 
-Other client plugins of TabNine need start a child process for TabNine binary and use Pipe for communication.
-I haven't found any solution to start a child process with `Jquery`. Neither have I found any solution to install third-part
-Libs like `child_process` for Jupyter.
+Other client plugins of TabNine require starting a child process for TabNine binary and using Pipe for communication.
+This can't be done with Jupyter Notebook, since child process can't be created with JQuery and Jupyter Notebook doesn't provide any way for adding third-part js libs to plugins.
+
+In this repository, it is achieved through ching the plugin to a HTTP client and starting a server wirtten in Golang to wrap the TabNine binray and handle the clients requests.
 
 I solved this by change the plugin to a HTTP client and start a server written in `Golang` wrapped the TabNine binary and
 handle the client's requests.
@@ -43,3 +44,7 @@ jupyter nbextension enable tabnine/main --user
 mkdir -p ${HOME}/.jupyter/custom/ #For windows: mkdir -p %HOMEPATH%\.jupyter\custom
 cp plugin/custom/custom.css ${HOME}/.jupyter/custom/ #For windows: cp plugin/custom/custom.css %HOMEPATH%\.jupyter\custom\
 ```
+
+## TODO
+[ ] Package this extension to a pypi package.
+[ ] Develop an extension for JupyterLab.
