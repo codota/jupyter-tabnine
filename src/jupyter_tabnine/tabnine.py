@@ -83,8 +83,8 @@ class TabNine(object):
 
     def _download(self):
         binary_dir = os.path.join(self._install_dir, "binaries")
-        os.chmod(get_tabnine_path(binary_dir), 0o777) # to make sure the bianry is executable
         if os.path.isdir(binary_dir) and get_tabnine_path(binary_dir):
+            os.chmod(get_tabnine_path(binary_dir), 0o777) # to make sure the bianry is executable
             self.logger.info("Binary already exists, skip download")
             return
         tabnine_sub_path = get_tabnine_sub_path()
