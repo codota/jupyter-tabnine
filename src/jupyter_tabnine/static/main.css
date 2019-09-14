@@ -1,0 +1,32 @@
+.complete-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  vertical-align: middle;
+  font-family: "Lucida Console", Courier, monospace;
+}
+
+.complete-block {
+  min-width: 200px;
+  margin: 2px;
+  padding: 1px;
+  display: inline-block;
+}
+
+
+
+.complete-word {
+  width: auto;
+  text-align: left;
+}
+
+.complete-detail {
+  text-align: right;
+}
+
+
+.complete-dropdown-content {
+  background-color: rgb(255, 255, 255, 0.85);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+}
+
