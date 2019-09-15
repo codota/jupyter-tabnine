@@ -22,8 +22,8 @@ The extension consists of a pypi package that includes a javascript
 - via pip for the version hosted on pypi
 
 From the github repo or from Pypi,
-1. install the package
 
+1. install the package
 
    -  ``pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]``
    -  or ``pip3 install jupyter_tabnine [--user][--upgrade]``
