@@ -35,7 +35,8 @@ From the github repo or from Pypi,
     jupyter nbextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
     jupyter serverextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
     ```
-For Jupyter versions before 4.2, the situation after step 1 is more tricky, since the --py option isn’t available, so you will have to find the location of the source files manually as follows (instructions adapted from [@jcb91](https://github.com/jcb91)’s jupyter_highlight_selected_word). Execute
+---
+For **Jupyter versions before 4.2**, the situation after step 1 is more tricky, since the --py option isn’t available, so you will have to find the location of the source files manually as follows (instructions adapted from [@jcb91](https://github.com/jcb91)’s jupyter_highlight_selected_word). Execute
 
 ```Python
 python -c "import os.path as p; from jupyter_tabnine import __file__ as f, _jupyter_nbextension_paths as n; print(p.normpath(p.join(p.dirname(f), n()[0]['src'])))"
