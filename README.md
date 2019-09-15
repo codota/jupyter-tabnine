@@ -23,7 +23,9 @@ From the github repo or from Pypi,
     * `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]`
     * or `pip3 install jupyter_tabnine [--user][--upgrade]`
     * or clone the repo and install
+    
         `git clone https://github.com/wenmin-wu/jupyter-tabnine.git`
+        
         `python3 setup.py install`
 2. install the notebook extension
     `jupyter nbextension install --py jupyter_tabnine [--user|--sys-prefix|--system]`
@@ -35,7 +37,9 @@ From the github repo or from Pypi,
     ```
 For Jupyter versions before 4.2, the situation after step 1 is more tricky, since the --py option isn’t available, so you will have to find the location of the source files manually as follows (instructions adapted from [@jcb91](https://github.com/jcb91)’s jupyter_highlight_selected_word). Execute
 
-`python -c "import os.path as p; from jupyter_tabnine import __file__ as f, _jupyter_nbextension_paths as n; print(p.normpath(p.join(p.dirname(f), n()[0]['src'])))"`
+```Python
+python -c "import os.path as p; from jupyter_tabnine import __file__ as f, _jupyter_nbextension_paths as n; print(p.normpath(p.join(p.dirname(f), n()[0]['src'])))"
+```
 Then, issue
 ```Bash
 jupyter nbextension install <output source directory>
