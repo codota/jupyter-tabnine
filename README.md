@@ -21,7 +21,7 @@ notebook extension, along with a python jupyter server extension. Since Jupyter 
 From the github repo or from Pypi,
 1. install the package
     * `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]`
-    * or `pip3 install jupyter_tabnine [--user][--upgrade]`
+    * or `pip3 install jupyter-tabnine [--user][--upgrade]`
     * or clone the repo and install
     
         `git clone https://github.com/wenmin-wu/jupyter-tabnine.git`
