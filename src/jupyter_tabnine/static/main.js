@@ -488,7 +488,7 @@ define([
                 this.deep_completer = new DeepCompleter(this, this.events)
             }
 
-            if (config.assist_active && !event.altKey && !event.metaKey && !event.ctrlKey
+            if (assistActive && !event.altKey && !event.metaKey && !event.ctrlKey
                 && (this instanceof CodeCell) && !onlyModifierEvent(event)) {
                 this.tooltip.remove_and_cancel_tooltip();
                 if (!editor.somethingSelected() &&
