@@ -1,6 +1,7 @@
 # TabNine for Jupyter Notebook
 
-## Overview
+*Read this in other languages: [English](README.md), [中文](README.ch.md)*
+
 ![jupyter-tabnine](https://github.com/wenmin-wu/jupyter-tabnine/blob/master/screenshots/demo.gif)
 
 This extension for Jupyter Notebook enables the use of coding auto-completion based on Deep Learning.
