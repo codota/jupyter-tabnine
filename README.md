@@ -1,47 +1,55 @@
-# Jupyter TabNine
+# TabNine for Jupyter Notebook
 
 ## Overview
 ![jupyter-tabnine](https://github.com/wenmin-wu/jupyter-tabnine/blob/master/screenshots/demo.gif)
 
-This project provides coding autocompletion based on [TabNine](https://github.com/zxqfl/TabNine) for Jupyter.
+This extension for Jupyter Notebook enables the use of coding auto-completion based on Deep Learning.
 
-Other client plugins of TabNine require starting a child process for TabNine binary and using Pipe for communication.
-This can't be done with Jupyter Notebook, since child process can't be created with JQuery and Jupyter Notebook doesn't provide any way for adding third-part js libs to plugins.
+Other client plugins of TabNine require starting a child process for TabNine binary and using Pipe for communication. This can’t be done with Jupyter Notebook, since child process can’t be created with JQuery and Jupyter Notebook doesn’t provide any way for adding third-part js libs to plugins.
 
-In this repository, it is achieved through ching the plugin to a HTTP client and starting a server wirtten in Golang to wrap the TabNine binray and handle the clients requests.
+In this repository, it is achived by developing a client plugin and a server plugin for Jupyter Notebook. The client plugin generate request info and send http request to the server plugin. The server plugin pass the request info to it’s client process (TabNine) and return the request to client plugin.
 
-## Install
+## Installation
 
-### Prerequirements
-* docker
-* jupyter >= 4.1 (you can check with `jupyter --version`)
-* git clone this project by running `git clone git@github.com:wenmin-wu/jupyter-tabnine.git`
+The extension consists of a pypi package that includes a javascript
+notebook extension, along with a python jupyter server extension. Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions. The extension can be installed:
 
-### For Linux or Mac
+* from the master version on the github repo (this will be always the most recent version)
 
-Just run `bash bootstrap.sh` you can also install it manually as following.
+* via pip for the version hosted on pypi
 
-### For Windows (or Manually)
+From the github repo or from Pypi,
+1. install the package
+    * `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]`
+    * or `pip3 install jupyter_tabnine [--user][--upgrade]`
+    * or clone the repo and install
+        `git clone https://github.com/wenmin-wu/jupyter-tabnine.git`
+        `python3 setup.py install`
+2. install the notebook extension
+    `jupyter nbextension install --py jupyter_tabnine [--user|--sys-prefix|--system]`
 
-#### 1. Build docker image
+3. and enable notebook extension and server extension
+    ```Bash
+    jupyter nbextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
+    jupyter serverextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
+    ```
+For Jupyter versions before 4.2, the situation after step 1 is more tricky, since the --py option isn’t available, so you will have to find the location of the source files manually as follows (instructions adapted from [@jcb91](https://github.com/jcb91)’s jupyter_highlight_selected_word). Execute
 
-* `docker build -t="tabnine-server:latest"`
-#### 2. Run server
-
+`python -c "import os.path as p; from jupyter_tabnine import __file__ as f, _jupyter_nbextension_paths as n; print(p.normpath(p.join(p.dirname(f), n()[0]['src'])))"`
+Then, issue
 ```Bash
-docker run --rm --name jupyter-tabnine-server \
-    -p 9999:8080 -d tabnine-server:latest
+jupyter nbextension install <output source directory>
+jupyter nbextension enable jupyter_tabnine/jupyter_tabnine
 ```
+where `<output source directory>` is the output of the first python command.
 
-#### 3. Install plugin for Jupyter
-```Bash
-jupyter nbextension install plugin/tabnine --user
-jupyter nbextension enable tabnine/main --user
+## Tips
+* A shortcut is added to let you switch between Jupyter raw completion and TabNine auto-competion. Just enter `shift` + `space` when you want raw completion of Jupyter :)
+* Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Read following to learn how to deploy remote server.
 
-mkdir -p ${HOME}/.jupyter/custom/ #For windows: mkdir -p %HOMEPATH%\.jupyter\custom
-cp plugin/custom/custom.css ${HOME}/.jupyter/custom/ #For windows: cp plugin/custom/custom.css %HOMEPATH%\.jupyter\custom\
-```
+## Remote Completion Server Deployment
+
 
 ## TODO
-- [ ] Package this extension to a pypi package.
+- [x] Package this extension to a pypi package.
 - [ ] Develop an extension for JupyterLab.
