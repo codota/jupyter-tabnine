@@ -51,4 +51,6 @@ jupyter serverextension enable <output source directory>
 ## Tips
 * 如果你想临时显示Jupyter Notebook原始的补全结果，可以按 `Shift` + `空格`。
 * 如果你想关掉TabNine自动补全，既可以在Notebook nbextension 的页面 disable Jupyter TabNine。也可以点击 `Help` 在弹框中找到 Jupyter TabNine把它点掉。
-* 远程补全服务器也是支持的。
+* 远程补全服务器也是支持的。如果你想部署个Server来处理客户端插件请求，或者你们公司在`Kubernetes`上部署一个Server Cluter请看下面章节了解如何部署自动补全Server。
+
+## 部署自动补全Server (可选)
