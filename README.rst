@@ -1,7 +1,7 @@
 TabNine for Jupyter Notebook
 =====
 This extension for Jupyter Notebook enables the use of 
-coding auto-completion based on Deep Learning (TabNine).
+coding auto-completion based on Deep Learning.
 
 Other client plugins of TabNine require starting a child process for TabNine binary
 and using Pipe for communication. This can't be done with Jupyter Notebook, since child process 
@@ -65,3 +65,8 @@ Then, issue
 
 where ``<output source directory>`` is the output of the first python
 command.
+
+Tips
+------------
+- A shortcut is added to let you switch between Jupyter raw completion and TabNine auto-competion. Just enter ``shift`` + ``space`` when you want raw completion of Jupyter :)
+- Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Refer https://github.com/wenmin-wu/jupyter-tabnine to learn how to deploy remote server.
