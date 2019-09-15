@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   vertical-align: middle;
-  font-family: "Lucida Console", Courier, monospace;
+  font-family: monospace, monospace;
 }
 
 .complete-block {
@@ -11,6 +11,16 @@
   margin: 2px;
   padding: 1px;
   display: inline-block;
+}
+
+.user-message {
+	margin: 2px;
+	padding: 1px;
+  display: list-item;
+}
+
+.user-message span {
+	color: #CD5C5C;
 }
 
 
@@ -29,4 +39,3 @@
   background-color: rgb(255, 255, 255, 0.85);
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
 }
-
