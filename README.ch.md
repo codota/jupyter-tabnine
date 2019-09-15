@@ -10,7 +10,7 @@ Jupyter Notebook上基于TabNine的自动补全插件，实现基于深度学习
 
 本项目通过分别实现一个Jupyter Notebook插件和一个Jupyter Server插件来解决这个问题。客户端和服务器通过HTTP来通信。
 基于`JavaScript`的客户端插件根据文件内容构造请求数据，并向Server插件发送请求。基于`Python`的server插件在初始化时启动一个子进程来执行`TabNine`二进制文件，
-在收到客户端请求后，将请求通过管道发送给`TabNine`并将TabNine的返回结果发送给客户端。
+在收到客户端请求后，将请求通过管道发送给`TabNine`并将TabNine的返回结果发送给客户端。客户端收到结果后解析生成HTML组件并响应键盘事件。
 
 ## 安装
 整个安装步骤分为：安装python包、安装客户端插件和`enable`客户端、服务器插件，所有安装步骤都可以通过`pip`和`jupyter`命令完成。
