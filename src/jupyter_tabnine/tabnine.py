@@ -3,11 +3,28 @@ import logging
 import os
 import platform
 import subprocess
+import threading
 from urllib.request import urlopen
 from urllib.error import HTTPError
 
+if platform.system() == "Windows":
+    try:
+        from colorama import init
+        init(convert=True)
+    except ImportError:
+        try:
+            import pip
+            pip.main(['install', '--user', 'colorama'])
+            from colorama import init
+            init(convert=True)
+        except Exception:
+            logger = logging.getLogger('ImportError')
+            logger.error('Install colorama failed. Install it manually to enjoy colourful log.')
 
-logging.basicConfig(level=logging.INFO)
+
+logging.basicConfig(level=logging.INFO,
+                    format='\x1b[1m\x1b[33m[%(levelname)s %(asctime)s.%(msecs)03d %(name)s]\x1b[0m: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 _TABNINE_UPDATE_VERSION_URL = "https://update.tabnine.com/version"
 _TABNINE_DOWNLOAD_URL_FORMAT = "https://update.tabnine.com/{}"
@@ -16,21 +33,44 @@ _SYSTEM_MAPPING = {
     "Linux": "unknown-linux-gnu",
     "Windows": "pc-windows-gnu",
 }
+      
+class TabNineDownloader(threading.Thread):
+    def __init__(self, download_url, output_path):
+        threading.Thread.__init__(self)
+        self.download_url = download_url
+        self.output_path = output_path
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def run(self):
+        output_dir = os.path.dirname(self.output_path)
+        try:
+            self.logger.info('Begin to download TabNine Binary from %s',
+                             self.download_url)
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir)
+            with urlopen(self.download_url) as res, \
+                open(self.output_path, 'wb') as out:
+                out.write(res.read())
+            os.chmod(self.output_path, 0o755)
+            self.logger.info('Finish download TabNine Binary to %s',
+                             self.output_path)
+        except Exception as e:
+            self.logger.error("Download failed, error: %s", e)
 
 
 class TabNine(object):
     """
     TabNine python wrapper
     """
-
     def __init__(self):
         self.name = "tabnine"
         self._proc = None
         self._response = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self._install_dir = os.path.dirname(os.path.realpath(__file__))
+        self._binary_dir = os.path.join(self._install_dir, "binaries")
         self.logger.info(" install dir: %s", self._install_dir)
-        self._download()
+        self.download_if_needed()
 
     def request(self, data):
         proc = self._get_running_tabnine()
@@ -53,8 +93,7 @@ class TabNine(object):
         if self._proc is not None:
             self._proc.terminate()
             self._proc = None
-        binary_dir = os.path.join(self._install_dir, "binaries")
-        path = get_tabnine_path(binary_dir)
+        path = get_tabnine_path(self._binary_dir)
         if path is None:
             self.logger.error("no TabNine binary found")
             return
@@ -81,28 +120,23 @@ class TabNine(object):
             self._restart()
         return self._proc
 
+    def download_if_needed(self):
+        if os.path.isdir(self._binary_dir):
+            tabnine_path = get_tabnine_path(self._binary_dir)
+            if tabnine_path is not None:
+                os.chmod(tabnine_path, 0o755)
+                self.logger.info(
+                    "TabNine binary already exists in %s ignore downloading",
+                    tabnine_path
+                )
+                return
+        self._download()
+
     def _download(self):
-        binary_dir = os.path.join(self._install_dir, "binaries")
-        if not os.path.isdir(binary_dir):
-            os.makedirs(binary_dir)
-        if os.path.isdir(binary_dir) and get_tabnine_path(binary_dir):
-            os.chmod(get_tabnine_path(binary_dir), 0o777) # to make sure the bianry is executable
-            self.logger.info("Binary already exists, skip download")
-            return
         tabnine_sub_path = get_tabnine_sub_path()
-        try:
-            binary_path = os.path.join(binary_dir, tabnine_sub_path)
-            binary_dir = os.path.dirname(binary_path)
-            download_url = _TABNINE_DOWNLOAD_URL_FORMAT.format(tabnine_sub_path)
-            self.logger.info("binary path: %s", binary_path)
-            self.logger.info("download url: %s", download_url)
-            if not os.path.isdir(binary_dir):
-                os.makedirs(binary_dir)
-            with urlopen(download_url) as res, open(binary_path, "wb") as binary:
-                binary.write(res.read())
-            os.chmod(binary_path, 0o777)
-        except Exception as e:
-            self.logger.error("Download failed, error: %s", e)
+        binary_path = os.path.join(self._binary_dir, tabnine_sub_path)
+        download_url = _TABNINE_DOWNLOAD_URL_FORMAT.format(tabnine_sub_path)
+        TabNineDownloader(download_url, binary_path).start()
 
 
 def get_tabnine_sub_path():
@@ -131,6 +165,7 @@ def get_tabnine_path(binary_dir):
         path = os.path.join(binary_dir, version, triple, executable_name("TabNine"))
         if os.path.isfile(path):
             return path
+    return None
 
 
 # Adapted from the sublime plugin
