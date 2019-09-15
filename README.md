@@ -45,7 +45,8 @@ python -c "import os.path as p; from jupyter_tabnine import __file__ as f, _jupy
 Then, issue
 ```Bash
 jupyter nbextension install <output source directory>
-jupyter nbextension enable jupyter_tabnine/jupyter_tabnine
+jupyter nbextension enable jupyter_tabnine/main
+jupyter serverextension enable <output source directory>
 ```
 where `<output source directory>` is the output of the first python command.
 
