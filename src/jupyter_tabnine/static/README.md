@@ -28,3 +28,7 @@ Options
 
 * `jupytertabnine.assist_delay`:
    delay in milliseconds between keypress & completion request.
+
+* `jupyter_tabnine.remote_server_url`:
+   remote server url, you may want to use a remote server to handle client request.
+   This can spped up the request handling depending on the server configuration. Refer to https://github.com/wenmin-wu/jupyter-tabnine to see how to deploy remote server.
