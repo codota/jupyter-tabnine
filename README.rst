@@ -14,9 +14,9 @@ The server plugin pass the request info to it's client process (TabNine) and ret
 Installation
 ------------
 The extension consists of a pypi package that includes a javascript
- notebook extension, along with a python jupyter server extension.
- Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions.
- The extension can be installed
+notebook extension, along with a python jupyter server extension.
+Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions.
+The extension can be installed
 
 - from the master version on the github repo (this will be always the most recent version)
 - via pip for the version hosted on pypi
