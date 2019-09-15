@@ -5,8 +5,7 @@ coding auto-completion based on Deep Learning (TabNine).
 
 Other client plugins of TabNine require starting a child process for TabNine binary
 and using Pipe for communication. This can't be done with Jupyter Notebook, since child process 
-can't be created with JQuery and Jupyter Notebook doesn't provide any way for adding third-part js
- libs to plugins.
+can't be created with JQuery and Jupyter Notebook doesn't provide any way for adding third-part js libs to plugins.
 
 In this repository, it is achived by developing a client plugin and a server plugin for Jupyter Notebook.
 The client plugin generate request info and send http request to the server plugin. 
@@ -25,11 +24,13 @@ The extension consists of a pypi package that includes a javascript
 From the github repo or from Pypi,
 1. install the package
 
+
    -  ``pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]``
    -  or ``pip3 install jupyter_tabnine [--user][--upgrade]``
-   -  or clone the repo and install git clone
-      https://github.com/wenmin-wu/jupyter-tabnine.git python3
-      setup.py install
+   -  or clone the repo and install
+      ``git clone https://github.com/wenmin-wu/jupyter-tabnine.git``
+      
+      ``python3 setup.py install``
 
 2. install the notebook extension
 
