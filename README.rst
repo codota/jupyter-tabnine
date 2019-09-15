@@ -1,5 +1,5 @@
 TabNine for Jupyter Notebook
-=====
+==============================================
 This extension for Jupyter Notebook enables the use of 
 coding auto-completion based on Deep Learning.
 
@@ -44,6 +44,8 @@ From the github repo or from Pypi,
 
        jupyter nbextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
        jupyter serverextension enable --py jupyter_tabnine [--user|--sys-prefix|--system]
+
+------------
 
 For Jupyter versions before 4.2, the situation after step 1 is more
 tricky, since the ``--py`` option isn't available, so you will have to
