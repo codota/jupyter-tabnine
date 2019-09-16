@@ -539,8 +539,6 @@ define([
 
     function load_notebook_extension() {
         return Jupyter.notebook.config.loaded.then(function on_success() {
-            // Note: seems there's bug of pipeline, loaded will ends with
-            // `resolved undefined`, so the yaml config won't work.
             $.extend(true, config, Jupyter.notebook.config.data.jupyter_tabnine);
             loadCss('./main.css');
         }, function on_error(err) {
