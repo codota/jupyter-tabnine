@@ -50,8 +50,10 @@ jupyter serverextension enable <output source directory>
 ```
 where `<output source directory>` is the output of the first python command.
 
-## Tips
-* A shortcut is added to let you switch between Jupyter raw completion and TabNine auto-competion. Just enter `shift` + `space` when you want raw completion of Jupyter :)
+## Usage
+* Jupyter TabNine will be active after being installed. Sometimes, you may want to show the Jupyter original complete temporally, then click `shift` + `space`.
+
+   ![show original complete demo](screenshots/show-original-complete.gif)
 * Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Read following to learn how to deploy remote server.
 
 ## Remote Completion Server Deployment
