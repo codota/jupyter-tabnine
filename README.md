@@ -56,9 +56,12 @@ where `<output source directory>` is the output of the first python command.
    ![show original complete demo](screenshots/show-original-complete.gif)
 * Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Read following to learn how to deploy remote server.
 
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+[GNU General Public License v3.0](LICENSE)
+
 ## Remote Completion Server Deployment
-
-
-## TODO
-- [x] Package this extension to a pypi package.
-- [ ] Develop an extension for JupyterLab.
