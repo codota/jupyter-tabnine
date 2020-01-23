@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/x-rst",
     author_email="wuwenmin1991@gmail.com",
-    license="GPL-3.0",
+    license="MIT",
     description="Jupyter notebook extension which support coding auto-completion based on Deep Learning",
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
