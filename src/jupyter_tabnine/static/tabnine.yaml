@@ -41,7 +41,7 @@ Parameters:
 - name: jupyter_tabnine.remote_server_url
   description: |
     remote server url, you may want to use a remote server to handle client request.
-    this can spped up the request handling depending on the server configuration.
+    this can speed up the request handling depending on the server configuration.
     refer to https://github.com/wenmin-wu/jupyter-tabnine to see how to deploy remote server.
   input_type: string
   default: ''
