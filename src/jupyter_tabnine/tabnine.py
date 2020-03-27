@@ -33,13 +33,14 @@ _SYSTEM_MAPPING = {
     "Linux": "unknown-linux-gnu",
     "Windows": "pc-windows-gnu",
 }
-      
+
 class TabNineDownloader(threading.Thread):
-    def __init__(self, download_url, output_path):
+    def __init__(self, download_url, output_path, tabnine):
         threading.Thread.__init__(self)
         self.download_url = download_url
         self.output_path = output_path
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.tabnine = tabnine
 
     def run(self):
         output_dir = os.path.dirname(self.output_path)
@@ -54,8 +55,30 @@ class TabNineDownloader(threading.Thread):
             os.chmod(self.output_path, 0o755)
             self.logger.info('Finish download TabNine Binary to %s',
                              self.output_path)
+            sem_complete_on(self.tabnine)
         except Exception as e:
             self.logger.error("Download failed, error: %s", e)
+
+
+def sem_complete_on(tabnine):
+    SEM_ON_REQ_DATA = {
+        "version":"1.0.7",
+        "request":{
+            "Autocomplete":{
+                "filename":"test.py",
+                "before":"TabNine::sem",
+                "after":"",
+                "region_includes_beginning":True,
+                "region_includes_end":True,
+                "max_num_results":10
+            }
+        }
+    }
+    res = tabnine.request(json.dumps(SEM_ON_REQ_DATA))
+    try:
+        tabnine.logger.info(f' {res["results"][0]["new_prefix"]}{res["results"][0]["new_suffix"]}')
+    except Exception:
+        tabnine.logger.warning(' wrong response of turning on semantic completion')
 
 
 class TabNine(object):
@@ -129,6 +152,7 @@ class TabNine(object):
                     "TabNine binary already exists in %s ignore downloading",
                     tabnine_path
                 )
+                sem_complete_on(self)
                 return
         self._download()
 
@@ -136,7 +160,7 @@ class TabNine(object):
         tabnine_sub_path = get_tabnine_sub_path()
         binary_path = os.path.join(self._binary_dir, tabnine_sub_path)
         download_url = _TABNINE_DOWNLOAD_URL_FORMAT.format(tabnine_sub_path)
-        TabNineDownloader(download_url, binary_path).start()
+        TabNineDownloader(download_url, binary_path, self).start()
 
 
 def get_tabnine_sub_path():
