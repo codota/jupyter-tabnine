@@ -18,6 +18,17 @@ In this repository, it is achived by developing a client plugin and a server plu
 
 ## Installation
 
+I saw a lot users came across problems due to didn't install and configure this plugin correctly, the simplest way to install and configure this plugin is by issuing following command:
+
+```
+pip3 install jupyter-tabnine --user
+jupyter nbextension install --py jupyter_tabnine --user
+jupyter nbextension enable --py jupyter_tabnine --user
+jupyter serverextension enable --py jupyter_tabnine --user
+```
+
+If you want to install and congiure in a customized way, you can refer to following:
+
 The extension consists of a pypi package that includes a javascript
 notebook extension, along with a python jupyter server extension. Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions. The extension can be installed:
 
