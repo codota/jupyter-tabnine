@@ -118,6 +118,9 @@ define([
         // use get to solve post redirecting too many times
         $.get(serverUrl, { 'data': JSON.stringify(requestData) })
             .done(function (data) {
+                if (typeof data === 'string') {
+                    data = JSON.parse(data);
+                }
                 handleResData(data);
             }).fail(function (error) {
                 console.log(logPrefix, ' get error: ', error);

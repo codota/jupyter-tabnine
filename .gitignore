@@ -4,3 +4,4 @@ build
 dist
 *.egg-info
 *.ipynb
+go/cmd/binaries
