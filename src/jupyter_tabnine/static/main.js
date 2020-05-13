@@ -399,14 +399,18 @@ define([
             }
             that.isKeyupFired = false;
             if (event.keyCode == keycodes.up || event.keyCode == keycodes.tab
-                || event.keyCode == keycodes.down || event.keyCode == keycodes.enter) {
+                || event.keyCode == keycodes.down || event.keyCode == keycodes.enter
+                || event.keyCode == keycodes.esc) {
                 event.codemirrorIgnore = true;
                 event._ipkmIgnore = true;
                 event.preventDefault();
                 // it's better to prevent enter key when completions being shown
 
                 preIndex = currIndex;
-                if (event.keyCode == keycodes.up) {
+                if (event.keyCode == keycodes.esc) {
+                    that.close();
+                    return;
+                } else if (event.keyCode == keycodes.up) {
                     currIndex = currIndex - 1;
                 } else if (event.keyCode == keycodes.tab || event.keyCode == keycodes.down) {
                     currIndex = currIndex + 1;
