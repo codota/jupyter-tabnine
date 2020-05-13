@@ -427,9 +427,7 @@ define([
                         currIndex - options.length
                         : currIndex);
                 $(options[currIndex]).css('background', 'lightblue');
-                if (preIndex != -1) {
-                    $(options[preIndex]).css('background', '');
-                }
+                $(options[preIndex]).css('background', '');
             } else if (needUpdateComplete(event.keyCode)) {
                 // Let this be handled by keyup, since it can get current pressed key.
             } else {
