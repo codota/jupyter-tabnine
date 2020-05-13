@@ -7,9 +7,9 @@ Other client plugins of TabNine require starting a child process for TabNine bin
 and using Pipe for communication. This can't be done with Jupyter Notebook, since child process 
 can't be created with JQuery and Jupyter Notebook doesn't provide any way for adding third-part js libs to plugins.
 
-In this repository, it is achived by developing a client plugin and a server plugin for Jupyter Notebook.
+In this repository, it is achieved by developing a client plugin and a server plugin for Jupyter Notebook.
 The client plugin generate request info and send http request to the server plugin. 
-The server plugin pass the request info to it's client process (TabNine) and return the request to client plugin.
+The server plugin pass the request info to its client process (TabNine) and return the request to client plugin.
 
 Installation
 ------------
@@ -21,7 +21,7 @@ The extension can be installed
 - from the master version on the github repo (this will be always the most recent version)
 - via pip for the version hosted on pypi
 
-From the github repo or from Pypi,
+From the github repo or from pypi,
 
 1. install the package
 
@@ -70,5 +70,5 @@ command.
 
 Tips
 ------------
-- A shortcut is added to let you switch between Jupyter raw completion and TabNine auto-competion. Just enter ``shift`` + ``space`` when you want raw completion of Jupyter :)
-- Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Refer https://github.com/wenmin-wu/jupyter-tabnine to learn how to deploy remote server.
+- A shortcut is added to let you switch between Jupyter raw completion and TabNine auto-completion. Just enter ``shift`` + ``space`` when you want raw completion of Jupyter :)
+- Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a completion server cluster that services everyone. Refer https://github.com/wenmin-wu/jupyter-tabnine to learn how to deploy remote server.
