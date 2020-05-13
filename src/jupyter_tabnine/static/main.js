@@ -387,6 +387,7 @@ define([
         var options = $("#complete").find('.complete-container');
         var editor = this.editor;
         var currIndex = 0;
+        var preIndex;
         this.isKeyupFired = true; // make keyup only fire once
         var that = this;
         this._handle_keydown = function (comp, event) { // define as member method to handle close
@@ -404,6 +405,7 @@ define([
                 event.preventDefault();
                 // it's better to prevent enter key when completions being shown
 
+                preIndex = currIndex;
                 if (event.keyCode == keycodes.up) {
                     currIndex = currIndex - 1;
                 } else if (event.keyCode == keycodes.tab || event.keyCode == keycodes.down) {
@@ -425,6 +427,9 @@ define([
                         currIndex - options.length
                         : currIndex);
                 $(options[currIndex]).css('background', 'lightblue');
+                if (preIndex != -1) {
+                    $(options[preIndex]).css('background', '');
+                }
             } else if (needUpdateComplete(event.keyCode)) {
                 // Let this be handled by keyup, since it can get current pressed key.
             } else {
