@@ -61,3 +61,9 @@ jupyter serverextension enable <output source directory>
 [MIT License](LICENSE)
 
 ## 部署自动补全Server (可选)
+
+很快添加
+
+## Star 趋势
+
+[![Stargazers over time](https://starchart.cc/wenmin-wu/jupyter-tabnine.svg)](https://starchart.cc/wenmin-wu/jupyter-tabnine)
