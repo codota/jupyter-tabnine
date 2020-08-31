@@ -74,6 +74,13 @@ where `<output source directory>` is the output of the first python command.
    ![show original complete demo](images/show-original-complete.gif)
 * Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Read following to learn how to deploy remote server.
 
+## Uninstallation
+To uninstall TabNine plugin from mac/linux run the following commands:
+```Bash
+jupyter nbextension uninstall --py jupyter_tabnine
+pip3 uninstall jupyter-tabnine
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
