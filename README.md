@@ -92,8 +92,23 @@ Please make sure to update tests as appropriate.
 [MIT License](LICENSE)
 
 ## Remote Completion Server Deployment
+It's useful to deploy a remote tabnine server if you don't want it do occupy too much resources on your laptop. You can build, deploy and config a remote tabnine server according to the following steps.
+### Build Server Image
+**I have uploaded an image to Docker Hub, you can use it directly**
+* Install the golang (recommended version is 1.13 - 1.14)
+* Issue `go get -v github.com/wenmin-wu/jupyter-tabnine/go/cmd`
+* Issue `cd $HOME/go/src/github.com/wenmin-wu/jupyter-tabnine`
+* Issue `bash ./build-image.sh`
+### Start Server
+**Change the image name in this bash script to `wuwenmin1991/tabnine-server:1.0` if you did't build your own image**
+* Simply issue `bash start-server.sh`
 
-Will be added soon
+### Configure Under Nbextensions
+* Please [install Nbextensions](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/install.html) if you haven't installed.
+* Go
+
+### Stop Server
+* Simply issue `bash stop-server.sh`
 
 ## Stargazers over time
 
