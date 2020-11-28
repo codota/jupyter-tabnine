@@ -96,7 +96,7 @@ It's useful to deploy a remote tabnine server if you don't want to occupy too mu
 
 **NOTE:** You need to install jupyter-tabnine with `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip`, because the version which fix this plugin with remote server problem haven't been relased to PyPi.
 ### Build Server Image
-**I have uploaded an image to Docker Hub, you can use it directly**
+**I have uploaded an image to Docker Hub, skip this section if you want to use it directly.**
 * Install the golang (recommended version is 1.13 - 1.14)
 * Issue `go get -v github.com/wenmin-wu/jupyter-tabnine/go/cmd`
 * Issue `cd $HOME/go/src/github.com/wenmin-wu/jupyter-tabnine`
