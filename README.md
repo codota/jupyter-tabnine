@@ -93,6 +93,7 @@ Please make sure to update tests as appropriate.
 
 ## Remote Completion Server Deployment
 It's useful to deploy a remote tabnine server if you don't want to occupy too much local resources. You can build, deploy and config a remote tabnine server according to the following steps.
+
 **NOTE:** You need to install jupyter-tabnine with `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip`, because the version which fix this plugin with remote server problem haven't been relased to PyPi.
 ### Build Server Image
 **I have uploaded an image to Docker Hub, you can use it directly**
