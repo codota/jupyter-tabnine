@@ -6,7 +6,7 @@ with open('./README.rst') as f:
 
 setuptools.setup(
     name="jupyter_tabnine",
-    version='1.1.0',
+    version='1.2.0',
     url="https://github.com/wenmin-wu/jupyter-tabnine",
     author="Wenmin Wu",
     long_description=readme,
