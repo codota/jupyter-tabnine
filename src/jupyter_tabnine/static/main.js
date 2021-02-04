@@ -21,6 +21,9 @@ define([
 ) {
     'use strict';
 
+    const N_LINES_BEFORE = 50;
+    const N_LINES_AFTER = 50;
+
     var assistActive;
 
     var config = {
@@ -226,6 +229,8 @@ define([
         this.before = before;
         this.after = after;
 
+        before = before.slice(Math.max(0, before.length - N_LINES_BEFORE), before.length);
+        after = after.slice(0, N_LINES_AFTER);
         requestInfo.request.Autocomplete.before = before.join("\n");
         requestInfo.request.Autocomplete.after = after.join("\n");
 
@@ -292,8 +297,10 @@ define([
         } else {
             this.after.push(currLineAfter);
         }
-        requestInfo.request.Autocomplete.before = this.before.join('\n');
-        requestInfo.request.Autocomplete.after = this.after.join('\n');
+        var before = this.before.slice(Math.max(0, this.before.length - N_LINES_BEFORE), this.before.length);
+        var after = this.after.slice(0, N_LINES_AFTER);
+        requestInfo.request.Autocomplete.before = before.join('\n');
+        requestInfo.request.Autocomplete.after = after.join('\n');
         var that = this;
         requestComplterServer(requestInfo, true, function (data) {
             if (data.results.length == 0) {
