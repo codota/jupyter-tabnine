@@ -1,5 +1,7 @@
 # TabNine for Jupyter Notebook
 
+**This plugin has been created by [wenmin-wu](https://github.com/wenmin-wu).**
+
 **This plugin has been tested on MacOS, Linux and Windows, it support all these systems. For browsers it supports Chrome and Safari but not IE**
 
 If you found this plugin doesn't work for you, please debug according to [How to Debug](DEBUG.md). And if you can't figure out what's wrong, please release an issue and report the logs in detail.
