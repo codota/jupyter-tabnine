@@ -124,7 +124,7 @@ class TabNine(object):
             [
                 path,
                 "--client",
-                "sublime",
+                "jupyter",
                 "--log-file-path",
                 os.path.join(self._install_dir, "tabnine.log"),
             ],
