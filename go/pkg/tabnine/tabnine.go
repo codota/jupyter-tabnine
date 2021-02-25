@@ -81,7 +81,7 @@ func (t *TabNine) init() (err error) {
 	t.outPipeReader, t.outPipeWriter = io.Pipe()
 	wg.Wait()
 	if err == nil {
-		t.cmd = exec.Command(binaryPath, "--client=jupyter")
+		t.cmd = exec.Command(binaryPath, "--client=jupyter-server")
 		t.cmd.Stdin = t.inPipeReader
 		t.cmd.Stdout = t.outPipeWriter
 		t.outReader = bufio.NewReader(t.outPipeReader)
