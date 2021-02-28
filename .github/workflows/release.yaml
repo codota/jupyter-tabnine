@@ -1,0 +1,48 @@
+name: Create Release
+
+on:
+  push:
+    tags: 
+      - 'v*.*.*'
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Tag Version
+      id: tag-version
+      run: echo ::set-output name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+    - name: Package Version
+      id: setup-version
+      run: echo ::set-output name=SETUP_VERSION::$(python3 setup.py --version)
+    - name: Tag & setup.py Versions Not Matching
+      if: ${{ format('v{0}', steps.setup-version.outputs.SETUP_VERSION) != steps.tag-version.outputs.RELEASE_VERSION}}
+      run: exit 1
+    - name: Build package
+      id: build_package
+      run: |
+        pip3 install wheel && \
+        python3 setup.py sdist bdist_wheel
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Publish package
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: codota/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_TOKEN }}
