@@ -3,8 +3,11 @@ import logging
 import os
 import platform
 import subprocess
+import stat
 import threading
-from urllib.request import urlopen
+import zipfile
+
+from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError
 
 if platform.system() == "Windows":
@@ -26,35 +29,30 @@ logging.basicConfig(level=logging.INFO,
                     format='\x1b[1m\x1b[33m[%(levelname)s %(asctime)s.%(msecs)03d %(name)s]\x1b[0m: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-_TABNINE_UPDATE_VERSION_URL = "https://update.tabnine.com/version"
-_TABNINE_DOWNLOAD_URL_FORMAT = "https://update.tabnine.com/{}"
-_SYSTEM_MAPPING = {
-    "Darwin": "apple-darwin",
-    "Linux": "unknown-linux-gnu",
-    "Windows": "pc-windows-gnu",
-}
+_TABNINE_SERVER_URL = "https://update.tabnine.com/bundles"
+_TABNINE_EXECUTABLE = "TabNine"
 
 class TabNineDownloader(threading.Thread):
-    def __init__(self, download_url, output_path, tabnine):
+    def __init__(self, download_url, output_dir, tabnine):
         threading.Thread.__init__(self)
         self.download_url = download_url
-        self.output_path = output_path
+        self.output_dir = output_dir
         self.logger = logging.getLogger(self.__class__.__name__)
         self.tabnine = tabnine
 
     def run(self):
-        output_dir = os.path.dirname(self.output_path)
+        # output_path = os.path.join(self.output_dir, _TABNINE_EXECUTABLE)
         try:
-            self.logger.info('Begin to download TabNine Binary from %s',
-                             self.download_url)
-            if not os.path.isdir(output_dir):
-                os.makedirs(output_dir)
-            with urlopen(self.download_url) as res, \
-                open(self.output_path, 'wb') as out:
-                out.write(res.read())
-            os.chmod(self.output_path, 0o755)
-            self.logger.info('Finish download TabNine Binary to %s',
-                             self.output_path)
+            self.logger.info('Begin to download TabNine Binary from %s', self.download_url)
+            if not os.path.isdir(self.output_dir):
+                os.makedirs(self.output_dir)
+            zip_path, _ = urlretrieve(self.download_url)
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                for filename in zf.namelist():
+                    zf.extract(filename, self.output_dir)
+                    target = os.path.join(self.output_dir, filename)
+                    add_execute_permission(target)
+            self.logger.info('Finish download TabNine Binary to %s', self.output_dir)
             sem_complete_on(self.tabnine)
         except Exception as e:
             self.logger.error("Download failed, error: %s", e)
@@ -147,7 +145,7 @@ class TabNine(object):
         if os.path.isdir(self._binary_dir):
             tabnine_path = get_tabnine_path(self._binary_dir)
             if tabnine_path is not None:
-                os.chmod(tabnine_path, 0o755)
+                add_execute_permission(tabnine_path)
                 self.logger.info(
                     "TabNine binary already exists in %s ignore downloading",
                     tabnine_path
@@ -157,58 +155,64 @@ class TabNine(object):
         self._download()
 
     def _download(self):
-        tabnine_sub_path = get_tabnine_sub_path()
-        binary_path = os.path.join(self._binary_dir, tabnine_sub_path)
-        download_url = _TABNINE_DOWNLOAD_URL_FORMAT.format(tabnine_sub_path)
-        TabNineDownloader(download_url, binary_path, self).start()
-
-
-def get_tabnine_sub_path():
-    version = get_tabnine_version()
-    architect = parse_architecture(platform.machine())
-    system = _SYSTEM_MAPPING[platform.system()]
-    execute_name = executable_name("TabNine")
-    return "{}/{}-{}/{}".format(version, architect, system, execute_name)
+        version = get_tabnine_version()
+        distro = get_distribution_name()
+        tabnine_sub_path = os.path.join(version, distro)
+        download_url = "{}/{}/{}.zip".format(_TABNINE_SERVER_URL, tabnine_sub_path, _TABNINE_EXECUTABLE)
+        output_dir = os.path.join(self._binary_dir, tabnine_sub_path)
+        TabNineDownloader(download_url, output_dir, self).start()
 
 
 def get_tabnine_version():
+    endpoint_url = "{}/{}".format(_TABNINE_SERVER_URL, "version")
+
     try:
-        version = urlopen(_TABNINE_UPDATE_VERSION_URL).read().decode("UTF-8").strip()
-        return version
+        return urlopen(endpoint_url).read().decode("UTF-8").strip()
     except HTTPError:
         return None
 
 
+def get_distribution_name():
+    sysinfo = platform.uname()
+    sys_architecture = "aarch64" if sysinfo.machine == "arm64" else sysinfo.machine
+
+    if sysinfo.system == "Windows":
+        sys_platform = "pc-windows-gnu"
+
+    elif sysinfo.system == "Darwin":
+        sys_platform = "apple-darwin"
+
+    elif sysinfo.system == "Linux":
+        sys_platform = "unknown-linux-musl"
+
+    elif sysinfo.system == "FreeBSD":
+        sys_platform = "unknown-freebsd"
+
+    else:
+        raise RuntimeError("Platform was not recognized as any of "
+                           "Windows, macOS, Linux, FreeBSD")
+
+    return "{}-{}".format(sys_architecture, sys_platform)
+
+
 def get_tabnine_path(binary_dir):
+    distro = get_distribution_name()
     versions = os.listdir(binary_dir)
     versions.sort(key=parse_semver, reverse=True)
     for version in versions:
-        triple = "{}-{}".format(
-            parse_architecture(platform.machine()), _SYSTEM_MAPPING[platform.system()]
-        )
-        path = os.path.join(binary_dir, version, triple, executable_name("TabNine"))
+        path = os.path.join(binary_dir, version, distro, _TABNINE_EXECUTABLE)
         if os.path.isfile(path):
             return path
-    return None
 
 
-# Adapted from the sublime plugin
 def parse_semver(s):
     try:
         return [int(x) for x in s.split(".")]
     except ValueError:
         return []
 
-
-def parse_architecture(arch):
-    if arch == "AMD64":
-        return "x86_64"
-    else:
-        return arch
-
-
-def executable_name(name):
-    if platform.system() == "Windows":
-        return name + ".exe"
-    else:
-        return name
+def add_execute_permission(path):
+    st = os.stat(path)
+    new_mode = st.st_mode | stat.S_IEXEC
+    if new_mode != st.st_mode:
+        os.chmod(path, new_mode)
