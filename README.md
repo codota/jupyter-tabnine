@@ -16,7 +16,7 @@ This extension for Jupyter Notebook enables the use of coding auto-completion ba
 
 Other client plugins of TabNine require starting a child process for TabNine binary and using Pipe for communication. This can’t be done with Jupyter Notebook, since child process can’t be created with JQuery and Jupyter Notebook doesn’t provide any way for adding third-part js libs to plugins.
 
-In this repository, it is achived by developing a client plugin and a server plugin for Jupyter Notebook. The client plugin generate request info and send http request to the server plugin. The server plugin pass the request info to it’s client process (TabNine) and return the request to client plugin.
+In this repository, it is achieved by developing a client plugin and a server plugin for Jupyter Notebook. The client plugin generate request info and send http request to the server plugin. The server plugin pass the request info to its client process (TabNine) and return the request to client plugin.
 
 ## Installation
 
@@ -29,7 +29,7 @@ jupyter nbextension enable --py jupyter_tabnine --user
 jupyter serverextension enable --py jupyter_tabnine --user
 ```
 
-If you want to install and congiure in a customized way, you can refer to following:
+If you want to install and configure in a customized way, you can refer to following:
 
 The extension consists of a pypi package that includes a javascript
 notebook extension, along with a python jupyter server extension. Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions. The extension can be installed:
@@ -38,7 +38,7 @@ notebook extension, along with a python jupyter server extension. Since Jupyter 
 
 * via pip for the version hosted on pypi
 
-From the github repo or from Pypi,
+From the github repo or from pypi,
 1. install the package
     * `pip3 install https://github.com/wenmin-wu/jupyter-tabnine/archive/master.zip [--user][--upgrade]`
     * or `pip3 install jupyter-tabnine [--user][--upgrade]`
@@ -70,11 +70,15 @@ jupyter serverextension enable <output source directory>
 where `<output source directory>` is the output of the first python command.
 
 ## Usage
+<<<<<<< HEAD
 
 * Jupyter TabNine will be active after being installed. Sometimes, you may want to show the Jupyter original complete temporally, then click `shift` + `space`.
+=======
+* Jupyter TabNine will be active after being installed. Sometimes, you may want to show the Jupyter original complete temporarily, then click `shift` + `space`.
+>>>>>>> 90a3d8b6fff4ff75102646ce7f7657db39eba256
 
    ![show original complete demo](images/show-original-complete.gif)
-* Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a compeltion server cluster that services everyone. Read following to learn how to deploy remote server.
+* Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a completion server cluster that services everyone. Read following to learn how to deploy remote server.
 
 ## Uninstallation
 To uninstall TabNine plugin from mac/linux run the following commands:
