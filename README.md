@@ -70,12 +70,7 @@ jupyter serverextension enable <output source directory>
 where `<output source directory>` is the output of the first python command.
 
 ## Usage
-<<<<<<< HEAD
-
-* Jupyter TabNine will be active after being installed. Sometimes, you may want to show the Jupyter original complete temporally, then click `shift` + `space`.
-=======
 * Jupyter TabNine will be active after being installed. Sometimes, you may want to show the Jupyter original complete temporarily, then click `shift` + `space`.
->>>>>>> 90a3d8b6fff4ff75102646ce7f7657db39eba256
 
    ![show original complete demo](images/show-original-complete.gif)
 * Remote auto-completion server is also supported. You may want this to speed up the completion request handing. Or maybe your company want to deploy a completion server cluster that services everyone. Read following to learn how to deploy remote server.
