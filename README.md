@@ -29,7 +29,7 @@ jupyter nbextension enable --py jupyter_tabnine --user
 jupyter serverextension enable --py jupyter_tabnine --user
 ```
 
-If you want to install and congiure in a customized way, you can refer to following:
+If you want to install and configure in a customized way, you can refer to following:
 
 The extension consists of a pypi package that includes a javascript
 notebook extension, along with a python jupyter server extension. Since Jupyter 4.2, pypi is the recommended way to distribute nbextensions. The extension can be installed:
