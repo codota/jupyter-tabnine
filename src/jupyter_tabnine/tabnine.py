@@ -32,6 +32,7 @@ logging.basicConfig(level=logging.INFO,
 _TABNINE_SERVER_URL = "https://update.tabnine.com/bundles"
 _TABNINE_EXECUTABLE = "TabNine"
 
+
 class TabNineDownloader(threading.Thread):
     def __init__(self, download_url, output_dir, tabnine):
         threading.Thread.__init__(self)
@@ -41,7 +42,6 @@ class TabNineDownloader(threading.Thread):
         self.tabnine = tabnine
 
     def run(self):
-        # output_path = os.path.join(self.output_dir, _TABNINE_EXECUTABLE)
         try:
             self.logger.info('Begin to download TabNine Binary from %s', self.download_url)
             if not os.path.isdir(self.output_dir):
@@ -164,10 +164,10 @@ class TabNine(object):
 
 
 def get_tabnine_version():
-    endpoint_url = "{}/{}".format(_TABNINE_SERVER_URL, "version")
+    version_url = "{}/{}".format(_TABNINE_SERVER_URL, "version")
 
     try:
-        return urlopen(endpoint_url).read().decode("UTF-8").strip()
+        return urlopen(version_url).read().decode("UTF-8").strip()
     except HTTPError:
         return None
 
@@ -200,7 +200,7 @@ def get_tabnine_path(binary_dir):
     versions = os.listdir(binary_dir)
     versions.sort(key=parse_semver, reverse=True)
     for version in versions:
-        path = os.path.join(binary_dir, version, distro, _TABNINE_EXECUTABLE)
+        path = os.path.join(binary_dir, version, distro, executable_name(_TABNINE_EXECUTABLE))
         if os.path.isfile(path):
             return path
 
@@ -211,8 +211,16 @@ def parse_semver(s):
     except ValueError:
         return []
 
+
 def add_execute_permission(path):
     st = os.stat(path)
     new_mode = st.st_mode | stat.S_IEXEC
     if new_mode != st.st_mode:
         os.chmod(path, new_mode)
+
+
+def executable_name(name):
+    if platform.system() == "Windows":
+        return name + ".exe"
+    else:
+        return name
