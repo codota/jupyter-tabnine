@@ -52,7 +52,8 @@ class TabNineDownloader(threading.Thread):
             with urlopen(self.download_url) as res, \
                 open(self.output_path, 'wb') as out:
                 out.write(res.read())
-            os.chmod(self.output_path, 0o755)
+            if os.stat(tabnine_path).st_mode & 0o777 != 0o755:
+                os.chmod(self.output_path, 0o755)
             self.logger.info('Finish download TabNine Binary to %s',
                              self.output_path)
             sem_complete_on(self.tabnine)
@@ -147,7 +148,8 @@ class TabNine(object):
         if os.path.isdir(self._binary_dir):
             tabnine_path = get_tabnine_path(self._binary_dir)
             if tabnine_path is not None:
-                os.chmod(tabnine_path, 0o755)
+                if os.stat(tabnine_path).st_mode & 0o777 != 0o755:
+                    os.chmod(tabnine_path, 0o755)
                 self.logger.info(
                     "TabNine binary already exists in %s ignore downloading",
                     tabnine_path
