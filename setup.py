@@ -1,12 +1,14 @@
 import setuptools
+import os
 from glob import glob
+from src.jupyter_tabnine._version import __version__ as version
 
 with open('./README.rst') as f:
     readme = f.read()
 
 setuptools.setup(
     name="jupyter_tabnine",
-    version='1.2.2',
+    version=version,
     url="https://github.com/wenmin-wu/jupyter-tabnine",
     author="Wenmin Wu",
     long_description=readme,
