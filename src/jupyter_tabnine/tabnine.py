@@ -170,11 +170,10 @@ class Tabnine(object):
     def _download(self):
         version = get_tabnine_version()
         distro = get_distribution_name()
-        tabnine_sub_path = os.path.join(version, distro)
-        download_url = "{}/{}/{}.zip".format(
-            _TABNINE_SERVER_URL, tabnine_sub_path, _TABNINE_EXECUTABLE
+        download_url = "{}/{}/{}/{}.zip".format(
+            _TABNINE_SERVER_URL, version, distro, _TABNINE_EXECUTABLE
         )
-        output_dir = os.path.join(self._binary_dir, tabnine_sub_path)
+        output_dir = os.path.join(self._binary_dir, version, distro)
         TabnineDownloader(download_url, output_dir, self).start()
 
 
@@ -187,9 +186,18 @@ def get_tabnine_version():
         return None
 
 
+arch_translations = {
+    "arm64": "aarch64",
+    "AMD64": "x86_64",
+}
+
+
 def get_distribution_name():
     sysinfo = platform.uname()
-    sys_architecture = "aarch64" if sysinfo.machine == "arm64" else sysinfo.machine
+    sys_architecture = sysinfo.machine
+
+    if sys_architecture in arch_translations:
+        sys_architecture = arch_translations[sys_architecture]
 
     if sysinfo.system == "Windows":
         sys_platform = "pc-windows-gnu"
