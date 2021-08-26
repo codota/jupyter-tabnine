@@ -47,6 +47,10 @@ From the github repo or from Pypi,
         `git clone https://github.com/wenmin-wu/jupyter-tabnine.git`
         
         `python3 setup.py install`
+        
+    * install it using anaconda3:
+    clone the repo `git clone https://github.com/wenmin-wu/jupyter-tabnine`
+    then install it like  `~/anaconda3/bin/python3.7 setup.py install`
 2. install the notebook extension
     `jupyter nbextension install --py jupyter_tabnine [--user|--sys-prefix|--system]`
 
