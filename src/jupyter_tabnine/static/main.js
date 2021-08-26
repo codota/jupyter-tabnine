@@ -386,12 +386,14 @@ define([
             'top': top + 'px',
             'display': 'initial'
         });
+        var options = $("#complete").find('.complete-container');
+        $(options[0]).css('background', 'lightblue');
     };
 
     DeepCompleter.prototype.add_keyevent_listeners = function () {
         var options = $("#complete").find('.complete-container');
         var editor = this.editor;
-        var currIndex = -1;
+        var currIndex = 0;
         var preIndex;
         this.isKeyupFired = true; // make keyup only fire once
         var that = this;
@@ -404,33 +406,38 @@ define([
             }
             that.isKeyupFired = false;
             if (event.keyCode == keycodes.up || event.keyCode == keycodes.tab
-                || event.keyCode == keycodes.down || event.keyCode == keycodes.enter) {
+                || event.keyCode == keycodes.down || event.keyCode == keycodes.enter
+                || event.keyCode == keycodes.esc) {
                 event.codemirrorIgnore = true;
                 event._ipkmIgnore = true;
                 event.preventDefault();
                 // it's better to prevent enter key when completions being shown
-                if (event.keyCode == keycodes.enter) {
+                preIndex = currIndex;
+                if (event.keyCode == keycodes.esc) {
+                    that.close();
+                    return;
+                } else if (event.keyCode == keycodes.up) {
+                    currIndex = currIndex - 1;
+                } else if (event.keyCode == keycodes.tab || event.keyCode == keycodes.down) {
+                    currIndex = currIndex + 1;
+                } else {
+                    var end = editor.getCursor();
+                    if (that.completions[currIndex].old_suffix) {
+                        end.ch += that.completions[currIndex].old_suffix.length;
+                    }
+                    var replacement = that.completions[currIndex].new_prefix;
+                    replacement += that.completions[currIndex].new_suffix;
+                    editor.replaceRange(replacement, that.completeFrom, end);
                     that.close();
                     return;
                 }
-                preIndex = currIndex;
-                currIndex = event.keyCode == keycodes.up ? currIndex - 1 : currIndex + 1;
                 currIndex = currIndex < 0 ?
                     options.length - 1
                     : (currIndex >= options.length ?
                         currIndex - options.length
                         : currIndex);
                 $(options[currIndex]).css('background', 'lightblue');
-                var end = editor.getCursor();
-                if (that.completions[currIndex].old_suffix) {
-                    end.ch += that.completions[currIndex].old_suffix.length;
-                }
-                var replacement = that.completions[currIndex].new_prefix;
-                replacement += that.completions[currIndex].new_suffix;
-                editor.replaceRange(replacement, that.completeFrom, end);
-                if (preIndex != -1) {
-                    $(options[preIndex]).css('background', '');
-                }
+                $(options[preIndex]).css('background', '');
             } else if (needUpdateComplete(event.keyCode)) {
                 // Let this be handled by keyup, since it can get current pressed key.
             } else {
