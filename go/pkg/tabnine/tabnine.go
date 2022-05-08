@@ -1,6 +1,7 @@
 package tabnine
 
 import (
+	"archive/zip"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -45,8 +46,8 @@ type ResultEntry struct {
 }
 
 const (
-	updateVersionUrl  = "https://update.tabnine.com/version"
-	downloadUrlPrefix = "https://update.tabnine.com"
+	tabnineServerUrl = "https://update.tabnine.com/bundles"
+	pluginVersion    = "1.2.3"
 )
 
 var systemMap = map[string]string{
@@ -81,7 +82,13 @@ func (t *TabNine) init() (err error) {
 	t.outPipeReader, t.outPipeWriter = io.Pipe()
 	wg.Wait()
 	if err == nil {
-		t.cmd = exec.Command(binaryPath, "--client=jupyter-server")
+		t.cmd = exec.Command(
+			binaryPath,
+			"--client=jupyter",
+			fmt.Sprintf("--log-file-path=%s/tabnine.log", filepath.Dir(binaryPath)),
+			"--client-metadata",
+			fmt.Sprintf("pluginVersion=%s", pluginVersion),
+		)
 		t.cmd.Stdin = t.inPipeReader
 		t.cmd.Stdout = t.outPipeWriter
 		t.outReader = bufio.NewReader(t.outPipeReader)
@@ -176,7 +183,7 @@ func (t *TabNine) getBinaryPath() (binaryPath string, err error) {
 		}
 	}
 	// need download
-	resp, err := http.Get(updateVersionUrl)
+	resp, err := http.Get(fmt.Sprintf("%s/version", tabnineServerUrl))
 	if err != nil {
 		return
 	}
@@ -194,14 +201,52 @@ func (t *TabNine) getBinaryPath() (binaryPath string, err error) {
 	log.Printf("Latest version: %s\n", latestVersion)
 	subPath := filepath.Join(latestVersion, triple, exeName)
 	binaryPath = filepath.Join(binaryDir, subPath)
-	downloadUrl := fmt.Sprintf("%s/%s", downloadUrlPrefix, subPath)
+	zipFilePath := fmt.Sprintf("%s.zip", binaryPath)
+	downloadUrl := fmt.Sprintf("%s/%s.zip", tabnineServerUrl, subPath)
 	log.Printf("Download url: %s, Binary path: %s", downloadUrl, binaryPath)
-	err = t.downloadBinary(downloadUrl, binaryPath)
+	err = t.downloadBinary(downloadUrl, zipFilePath)
 	if err != nil {
 		log.Fatal("Download failed ", err)
 		return
 	}
+
+	archive, err := zip.OpenReader(zipFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	defer archive.Close()
+
+	outDir := filepath.Join(binaryDir, latestVersion, triple)
+	for _, f := range archive.File {
+		filePath := filepath.Join(outDir, f.Name)
+		fmt.Println("unzipping file ", filePath)
+		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			panic(err)
+		}
+		defer dstFile.Close()
+
+		fileInArchive, err := f.Open()
+		if err != nil {
+			panic(err)
+		}
+		defer fileInArchive.Close()
+
+		if _, err := io.Copy(dstFile, fileInArchive); err != nil {
+			panic(err)
+		}
+	}
+
+	err = os.Remove(zipFilePath)
+	if err != nil {
+		panic(err)
+	}
+
 	err = os.Chmod(binaryPath, 0755)
+	if err != nil {
+		panic(err)
+	}
 	log.Println("Download finished.")
 	return
 }
@@ -259,6 +304,9 @@ func isDir(path string) bool {
 func parseArch(arch string) string {
 	if strings.ToLower(arch) == "amd64" {
 		return "x86_64"
+	}
+	if strings.ToLower(arch) == "arm64" {
+		return "aarch64"
 	}
 	return arch
 }
