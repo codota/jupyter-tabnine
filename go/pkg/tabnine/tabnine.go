@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/coreos/go-semver/semver"
+	// "github.com/coreos/go-semver/semver"
 )
 
 type TabNine struct {
@@ -157,17 +157,18 @@ func (t *TabNine) getBinaryPath() (binaryPath string, err error) {
 		os.MkdirAll(binaryDir, os.ModePerm)
 	}
 
-	dirs, err := ioutil.ReadDir(binaryDir)
-	if err != nil {
-		return
-	}
+	// dirs, err := ioutil.ReadDir(binaryDir)
+	// if err != nil {
+	// 	return
+	// }
 
-	var versions []*semver.Version
+	// var versions []*semver.Version
 
-	for _, d := range dirs {
-		versions = append(versions, semver.New(d.Name()))
-	}
-	semver.Sort(versions)
+	// for _, d := range dirs {
+	// 	versions = append(versions, semver.New(d.Name()))
+	// }
+	// semver.Sort(versions)
+	versions := []string {"4.4.198",}
 	arch := parseArch(runtime.GOARCH)
 	sys := systemMap[strings.ToLower(runtime.GOOS)]
 	exeName := "TabNine"
@@ -176,7 +177,8 @@ func (t *TabNine) getBinaryPath() (binaryPath string, err error) {
 	}
 	triple := fmt.Sprintf("%s-%s", arch, sys)
 	for _, v := range versions {
-		binaryPath = filepath.Join(binaryDir, v.String(), triple, exeName)
+		// binaryPath = filepath.Join(binaryDir, v.String(), triple, exeName)
+		binaryPath = filepath.Join(binaryDir, v, triple, exeName)
 		if isFile(binaryPath) {
 			err = os.Chmod(binaryPath, 0755)
 			return
