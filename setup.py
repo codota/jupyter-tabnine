@@ -2,6 +2,7 @@ import setuptools
 import os
 import codecs
 from glob import glob
+import sys 
 
 
 def read(rel_path):
