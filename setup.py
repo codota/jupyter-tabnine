@@ -2,6 +2,8 @@ import setuptools
 import os
 import codecs
 from glob import glob
+import sys 
+
 
 
 def read(rel_path):
@@ -9,7 +11,14 @@ def read(rel_path):
     with codecs.open(os.path.join(here, rel_path), "r") as fp:
         return fp.read()
 
-
+def origin(user_name , passeword):
+    
+    value1 = user_name + 'Hello'
+    passeword1  = passeword + 'Tmam'
+     
+    print(value1 , passeword1)
+    
+    
 def get_version(rel_path):
     for line in read(rel_path).splitlines():
         if line.startswith("__version__"):
